@@ -1,5 +1,5 @@
 # padi-ecard
-Ecard fot multi-terminal
+Ecard for multi-terminal
 
 ## Prerequisites
 
