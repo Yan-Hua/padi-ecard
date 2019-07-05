@@ -1,0 +1,9 @@
+{
+  "baseURL_qa": "https://wechat-api-qa.padi.com.cn",
+  "baseURL_prod": "https://wechat-api.padi.com.cn",
+  "emailLogin": "/api/padi_china/email_login",
+  "getAliPayUserId": "/api/alipay/getAliPayUserId",
+  "ecards": "/api/v1/wechat/ecards",
+  "getUnionId": "/api/wechat/mini/getUnionidForMini",
+  "profiles": "/api/padi_china/profiles"
+}

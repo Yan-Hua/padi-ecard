@@ -1,26 +1,32 @@
 import '@tarojs/async-await'
 import Taro, { Component } from '@tarojs/taro'
 import { Provider } from '@tarojs/redux'
+import 'taro-ui/dist/style/index.scss'
+import 'taro-icons/scss/FontAwesome.scss'
 
-import Index from './pages/index'
+import LoginPage from './pages/login'
 
 import configStore from './store'
+import rootSaga from './sagas';
 
 import './app.scss'
 
-// 如果需要在 h5 环境中开启 React Devtools
-// 取消以下注释：
-// if (process.env.NODE_ENV !== 'production' && process.env.TARO_ENV === 'h5')  {
-//   require('nerv-devtools')
-// }
+if (process.env.NODE_ENV !== 'production' && process.env.TARO_ENV === 'h5')  {
+  require('nerv-devtools')
+}
 
 const store = configStore()
+store.runSaga(rootSaga);
 
 class App extends Component {
 
   config = {
     pages: [
-      'pages/index/index'
+      'pages/loadPage/loadPage',
+      'pages/login/login',
+      'pages/ecardsList/ecardsList',
+      'pages/forgetPassword/forgetPassword',
+      'pages/verifyEmail/verifyEmail'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -43,7 +49,7 @@ class App extends Component {
   render () {
     return (
       <Provider store={store}>
-        <Index />
+        <LoginPage />
       </Provider>
     )
   }
