@@ -1,8 +1,11 @@
 import { createStore, applyMiddleware, compose } from 'redux'
 import { createLogger } from 'redux-logger'
 import createSagaMiddleware, { END } from 'redux-saga'
-// import thunkMiddleware from 'redux-thunk'
 import rootReducer from '../reducers'
+
+// if (process.env.NODE_ENV === 'development') {
+//   middlewares.push(require('redux-logger').createLogger())
+// }
 
 export default function configStore () {
   const sagaMiddleware = createSagaMiddleware()
