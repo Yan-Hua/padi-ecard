@@ -37,7 +37,8 @@ const getData = async (url, data, paramsName, params) => http(`${baseURL}${url}`
 const postData = async (url, data) => http(`${baseURL}${url}`, data, 'POST')
 
 export const emailLogin = ({email, password}) => postData(config.emailLogin, {username: email, password})
-export const aliPayUserId = (code) => postData(config.getAliPayUserId, code)
+export const aliPayUserId = (authCode, code) => getData(config.getAliPayUserId, {}, authCode, code)
 export const fetchEcards = async () => getData(config.ecards, {})
 export const getUnionId = (jsCode, code) => getData(config.getUnionId, {}, jsCode, code)
 export const fetchProfiles = (email) => getData(config.profiles, {email})
+export const updateAliUser = (data) => postData(config.updateAlipayUser, data)

@@ -15,3 +15,7 @@ export const removeStorage = (key) => {
 export const getAuthorization = () => {
     return getStorage('token')
 }
+
+export const getStorageSync = (key) => {
+    return Taro.getStorageSync(key)
+}

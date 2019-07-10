@@ -26,7 +26,8 @@ class App extends Component {
       'pages/login/login',
       'pages/ecardsList/ecardsList',
       'pages/forgetPassword/forgetPassword',
-      'pages/verifyEmail/verifyEmail'
+      'pages/verifyEmail/verifyEmail',
+      'pages/aliPayLoadPage/aliPayLoadPage'
     ],
     window: {
       backgroundTextStyle: 'light',

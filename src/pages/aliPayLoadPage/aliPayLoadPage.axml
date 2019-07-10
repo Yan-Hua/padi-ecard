@@ -1,0 +1,12 @@
+<View>
+  <button 
+    class="getUserInfo"
+    type="primary"
+    open-type="getAuthorize" 
+    onGetAuthorize="onGetAuthorize" 
+    onError="onAuthError" 
+    scope='userInfo'
+  >
+      会员基础信息授权
+  </button>
+</View>
