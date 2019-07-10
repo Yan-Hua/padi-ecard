@@ -17,6 +17,7 @@ export const LOCATION_CHANGE = 'LOCATION_CHANGE'
 export const ECARDS = createRequestTypes('ECARDS')
 export const WECHAT_UNIONID = createRequestTypes('WECHAT_UNIONID')
 export const PROFILE = createRequestTypes('PROFILE')
+export const UPDATE_ALI_USER = 'UPDATE_ALI_USER'
 
 function action(type, payload = {}) {
   return {type, ...payload}
@@ -24,6 +25,7 @@ function action(type, payload = {}) {
 
 export const emailLogin = (data) => action(EMAIL_LOGIN, data)
 export const loadPage = () => action(LOAD_PAGE)
+export const updateAlipayUser = (data) => action(UPDATE_ALI_USER, data)
 
 export const loginRequest = {
   request: () => action(LOGIN_REQUEST[REQUEST]),
