@@ -39,8 +39,8 @@ class LoginForm extends Component {
     this.setState({ pending: true });
     const email = this.state.email.toLowerCase().trim();
     const password = this.state.password.trim();
-    if(!isEmail(email)) {
-      this.setStateAndShowAlert(!isEmail(email), false, '请输入正确的邮箱地址及密码', '关闭');
+    if(!isEmail(email) || !password) {
+      this.setStateAndShowAlert(true, true, '请输入正确的邮箱地址及密码', '关闭');
       return;
     }
     this.props.emailLogin({email, password});
@@ -104,16 +104,16 @@ class LoginForm extends Component {
               <View>
                 请输入您的 PADI SSO 账号（如您学习过 PADI eLearning，或登录过 PADI 专业人士网站，或注册过 PADI Scuba Earth，My PADI Club 等 PADI 相关服务平台，请直接输入您的邮箱和对应密码）
               </View>
-              <View className='padi-intro'>
-                PADI 全世界学习潜水的途径，蓝色星球的保护者大本营，和PADI一起择善而行，了解更多请关注 PADIDIVING。
-              </View>
           </View>
-          <View className='qrcode'>
+          { !(process.env.TARO_ENV === 'alipay') && <View className='qrcode'> 
+            <View className='padi-intro'>
+              PADI 全世界学习潜水的途径，蓝色星球的保护者大本营，和PADI一起择善而行，了解更多请关注 PADIDIVING。
+            </View> 
             <Image
               className='padi-qrcode'
               src={padi_qrcode}
             />
-          </View>
+          </View> }
         </View>
       </View>
     )

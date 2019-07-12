@@ -1,7 +1,7 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View } from '@tarojs/components'
 import { connect } from '@tarojs/redux'
-import { loadPage, locationChange, requestEcards } from '../../actions'
+import { loadPage, locationChange } from '../../actions'
 
 class LoadPage extends Component {
 
@@ -27,4 +27,4 @@ function mapStateToProps(state) {
     return {}
 }
 
-export default connect(mapStateToProps, { loadPage, locationChange, requestEcards })(LoadPage)
+export default connect(mapStateToProps, { loadPage, locationChange })(LoadPage)

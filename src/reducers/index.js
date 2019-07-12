@@ -6,12 +6,13 @@ import commonReducer from './common';
 function data(state = {}, { type, data }) {
   switch(type) {
     case ActionTypes.LOGIN_REQUEST[SUCCESS]:
-      return {}
+      const { wechat } = state
+      return { wechat }
     case ActionTypes.ECARDS[SUCCESS]:
       const { wechatUser, ...ecardsResult } = data
       return {...state, ...ecardsResult}
     case ActionTypes.PROFILE[SUCCESS]:
-      return {...state, profile: data}
+      return {...state, ...data}
     default: 
       return state
   }

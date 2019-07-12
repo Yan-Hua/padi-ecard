@@ -17,13 +17,15 @@
       line-height: 1.5;
       color: #858585;
       font-size: 22px;
-      .padi-intro {
-        margin-top: 30px;
-        color: rgb(86, 133, 229)
-      }
     }
     .qrcode {
       text-align: center;
+      .padi-intro {
+        font-size: 22px;
+        text-align: left;
+        margin-top: 30px;
+        color: rgb(86, 133, 229)
+      }
       .padi-qrcode {
         width: 150px;
         height: 150px;
