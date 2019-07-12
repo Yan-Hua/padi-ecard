@@ -17,8 +17,7 @@ const {
 function* fetchEntity(entity, apiFn, ...rest) {
   Taro.showLoading({ title: '' })
   yield put( entity.request(...rest) )
-  const result = yield call(apiFn, ...rest)
-  const { data, error } = result
+  const { data, error } = yield call(apiFn, ...rest)
   if(data) {
       Taro.hideLoading()
       yield put(entity.success(data))
@@ -41,6 +40,7 @@ function* fetchEntity(entity, apiFn, ...rest) {
 }
 
 function* fetchEntityNotJson(entity, apiFn, ...rest) {
+  Taro.showLoading({ title: '' })
   yield put( entity.request(...rest) )
   const {data, error} = yield call(apiFn, ...rest)
   if(data.toString()) {
@@ -49,9 +49,11 @@ function* fetchEntityNotJson(entity, apiFn, ...rest) {
   }else{
     yield put( entity.failure(error) )
   }
+  Taro.hideLoading()
 }
 
 function* postEntity(apiFn, notError, ...rest) {
+  Taro.hideLoading()
   const result = yield call(apiFn, ...rest)
   const {data, error} = result
   if(error) {
@@ -61,6 +63,7 @@ function* postEntity(apiFn, notError, ...rest) {
     }
     if(!notError) showDialog('', error.clientMsg, false, '关闭')
   }
+  Taro.hideLoading()
   return data
 }
 
@@ -70,6 +73,10 @@ export const fetchEcards = fetchEntity.bind(null, ecards, api.fetchEcards)
 export const fetchUnionId = fetchEntityNotJson.bind(null, getUnionId, api.getUnionId)
 export const fetchProfiles = fetchEntity.bind(null, profile, api.fetchProfiles)
 export const postAlipayUser = postEntity.bind(null, api.updateAliUser, false)
+
+function* loadEcardsPage() {
+  yield all([loadEcards(), loadProfile()])
+}
 
 function* loadEcards() {
   const diver = yield select(getUserInfo)
@@ -92,7 +99,7 @@ function* watchNavigate() {
     const { path, params } = location.path
     if(path === '/pages/ecardsList/ecardsList') {
       try {
-        yield call(loadEcards)
+        yield call(loadEcardsPage)
       }catch(error) {
         showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
       }
@@ -120,7 +127,7 @@ function* watchLoadPage() {
       }catch(error) {
         const { code } = yield call(() => Taro.login())
         if(code) {
-          const unionId = yield call(fetchUnionId, 'jsCode', code)
+          const unionId = yield call(fetchUnionId, code)
           if(unionId) {
             setStorage('token', unionId)
             Taro.redirectTo({ url: '/pages/login/login' })
@@ -149,14 +156,18 @@ function* watchLoadPage() {
         }else {
           try {
             const { authCode } = yield call(() => my.getAuthCode())
-            const { data } = yield call(fetchAliPayUserId, 'code', authCode)
-            setStorage('token', data.data)
-            userInfo.userId = token
-            try {
-              yield call(postAlipayUser, userInfo)
-              Taro.redirectTo({ url: '/pages/login/login' })
-            }catch(error) {
-              showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
+            const { data } = yield call(fetchAliPayUserId, authCode)
+            if(data.status === 0) {
+              setStorage('token', data.data)
+              userInfo.userId = token
+              try {
+                yield call(postAlipayUser, userInfo)
+                Taro.redirectTo({ url: '/pages/login/login' })
+              }catch(error) {
+                showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
+              }
+            }else {
+              showDialog('', '请求授权失败', false, '关闭')
             }
           }catch(error) {
             showDialog('', '请求授权失败', false, '关闭')
@@ -178,11 +189,10 @@ function* watchEmailLogin() {
     const emailLogin = yield take(actions.EMAIL_LOGIN)
     try {
       const { data } = yield call(fetchLoginRequest, emailLogin)
-      if(data && data.token) {
+      if(process.env.TARO_ENV === 'h5' && data && data.token) {
         setStorage('token', data.token)
       }
       if(data && data.ok === true) {
-        yield call(fetchEcards)
         Taro.navigateTo({ url: '/pages/ecardsList/ecardsList' })
       }
     } catch(error) {

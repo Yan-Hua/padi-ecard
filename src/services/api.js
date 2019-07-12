@@ -1,12 +1,12 @@
 import Taro from '@tarojs/taro'
-// import * as config from './config.json'
-import { getAuthorization } from './storage'
+import { getAuthorization, getStorageSync } from './storage'
 
 var config = require("./config.json");
 
 const baseURL = config.baseURL_qa;
 
-const http = async (url, data, method, paramsName, params) => {
+const http = async (endpoint, data, method) => {
+  const language = getStorageSync('language') === 'tc' ? 'zh_TW' : getStorageSync('language') === 'en' ? 'en' : 'zh_CN'
   let header = {
     'Content-Type': 'application/json'
   }
@@ -17,11 +17,16 @@ const http = async (url, data, method, paramsName, params) => {
   }).catch(err => {
     console.log(err)
   })
+  if(method === 'GET') {
+    data.lang = language
+  }
+  const url = method === 'POST' ? `${endpoint}?lang=${language}` : `${endpoint}`
   return Taro.request({
-    url: paramsName ? `${url}?${paramsName}=${params}` : url,
+    url,
     data,
     header,
-    method: method
+    method,
+    // cache: 'no-cache'
   }).then(res => {
     const { statusCode, data } = res
     if(statusCode !== 200){
@@ -33,12 +38,12 @@ const http = async (url, data, method, paramsName, params) => {
   })
 }
 
-const getData = async (url, data, paramsName, params) => http(`${baseURL}${url}`, data, 'GET', paramsName, params)
-const postData = async (url, data) => http(`${baseURL}${url}`, data, 'POST')
+const getData = async (endpoint, data) => http(`${baseURL}${endpoint}`, data, 'GET')
+const postData = async (endpoint, data) => http(`${baseURL}${endpoint}`, data, 'POST')
 
 export const emailLogin = ({email, password}) => postData(config.emailLogin, {username: email, password})
-export const aliPayUserId = (authCode, code) => getData(config.getAliPayUserId, {}, authCode, code)
+export const aliPayUserId = (code) => getData(config.getAliPayUserId, {code})
 export const fetchEcards = async () => getData(config.ecards, {})
-export const getUnionId = (jsCode, code) => getData(config.getUnionId, {}, jsCode, code)
+export const getUnionId = (jsCode) => getData(config.getUnionId, {jsCode})
 export const fetchProfiles = (email) => getData(config.profiles, {email})
 export const updateAliUser = (data) => postData(config.updateAlipayUser, data)

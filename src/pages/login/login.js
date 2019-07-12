@@ -4,7 +4,7 @@ import { AtAvatar } from 'taro-ui'
 import { connect } from '@tarojs/redux'
 import { emailLogin, locationChange } from '../../actions'
 import LoginForm from '../../components/login/loginForm'
-import { getProfile } from '../../reducers/selectors'
+import { getUserHeaderInfo } from '../../reducers/selectors'
 
 import padi_logo from '../../assets/images/PADI-logo.png'
 import avatar from '../../assets/images/avatar.jpg'
@@ -26,7 +26,7 @@ class LoginPage extends Component {
   }
 
   render () {
-    const { emailLogin, profiles } = this.props
+    const { emailLogin, userHeaderInfo } = this.props
     return (
       <View className='login-page'>
         <View className='top'>
@@ -34,7 +34,7 @@ class LoginPage extends Component {
             className='padi-logo'
             src={padi_logo}
           />
-          <AtAvatar circle image={profiles && profiles.wechat ? profiles.wechat.headimgurl : avatar} className='avatar'></AtAvatar>
+          <AtAvatar circle image={userHeaderInfo ? userHeaderInfo.headimgurl : avatar} className='avatar'></AtAvatar>
         </View>
         <LoginForm emailLogin={emailLogin} />
       </View>
@@ -44,7 +44,7 @@ class LoginPage extends Component {
 
 function mapStateToProps(state) {
   return {
-    profiles: getProfile(state)
+    userHeaderInfo: getUserHeaderInfo(state)
   }
 }
 

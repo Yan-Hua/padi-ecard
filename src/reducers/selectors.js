@@ -12,3 +12,4 @@ export const getEcards = ({ data }) => {
             })
 }
 export const getProfile = ({ data }) => data.profile
+export const getUserHeaderInfo = ({ data }) => data.wechat
