@@ -4,7 +4,7 @@ import * as actions from '../actions'
 import { api } from '../services'
 import showDialog from '../components/common/showDialog'
 import { setStorage, getAuthorization, getStorageSync } from '../services/storage'
-import { getUserInfo, getProfile } from '../reducers/selectors'
+import { getUserInfo, getProfile, getUserHeaderInfo } from '../reducers/selectors'
 
 const { 
   loginRequest, 
@@ -12,7 +12,11 @@ const {
   ecards,
   getUnionId,
   profile, 
+  hasLogin,
+  showPadiQrCode
 } = actions
+
+const token = getStorageSync('token')
 
 function* fetchEntity(entity, apiFn, ...rest) {
   Taro.showLoading({ title: '' })
@@ -44,9 +48,11 @@ function* fetchEntityNotJson(entity, apiFn, ...rest) {
   yield put( entity.request(...rest) )
   const {data, error} = yield call(apiFn, ...rest)
   if(data.toString()) {
+    Taro.hideLoading()
     yield put( entity.success(data) )
     return data
   }else{
+    Taro.hideLoading()
     yield put( entity.failure(error) )
   }
   Taro.hideLoading()
@@ -73,6 +79,7 @@ export const fetchEcards = fetchEntity.bind(null, ecards, api.fetchEcards)
 export const fetchUnionId = fetchEntityNotJson.bind(null, getUnionId, api.getUnionId)
 export const fetchProfiles = fetchEntity.bind(null, profile, api.fetchProfiles)
 export const postAlipayUser = postEntity.bind(null, api.updateAliUser, false)
+export const fetchHasLogin = fetchEntityNotJson.bind(null, hasLogin, api.hasLogin)
 
 function* loadEcardsPage() {
   yield all([loadEcards(), loadProfile()])
@@ -106,6 +113,10 @@ function* watchNavigate() {
     }
     if(path === '/pages/login/login' || path === '/pages/verifyEmail/verifyEmail') {
       yield call(loadProfile)
+      const userInfo = yield select(getUserHeaderInfo)
+      if(!userInfo && process.env.TARO_ENV === 'alipay') {
+        Taro.redirectTo({ url: '/pages/aliPayLoadPage/aliPayLoadPage' })
+      }
     }
   }
 }
@@ -113,73 +124,44 @@ function* watchNavigate() {
 function* watchLoadPage() {
   while(true) {
     yield take(actions.LOAD_PAGE)
-    if(process.env.TARO_ENV === 'weapp') {
+    if(token) {
       try {
-        const token = yield call(() => getAuthorization())
-        if(token.data) {
-          const result = yield call(fetchEcards)
-          if(result) {
-            Taro.redirectTo({ url: '/pages/ecardsList/ecardsList' })
-          }else {
-            showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
-          }
-        }
+        const emailLoggedIn = yield call(fetchHasLogin, token)
+        token && emailLoggedIn ? Taro.redirectTo({ url: '/pages/ecardsList/ecardsList' }) : Taro.redirectTo({ url: '/pages/login/login' })
       }catch(error) {
+        showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
+      }
+    }else {
+      if(process.env.TARO_ENV === 'weapp') {
         const { code } = yield call(() => Taro.login())
         if(code) {
-          const unionId = yield call(fetchUnionId, code)
-          if(unionId) {
-            setStorage('token', unionId)
+          const { status, data } = yield call(fetchUnionId, code)
+          if(status === 0) {
+            setStorage('token', data)
             Taro.redirectTo({ url: '/pages/login/login' })
-          }else {
-            showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
+          }else if(status === 1) {
+            yield put(showPadiQrCode())
           }
         }else {
           showDialog('', '请求授权失败', false, '关闭')
         }
-      }
-    }else if(process.env.TARO_ENV === 'alipay') {
-      console.log('ali')
-      const token = getStorageSync('token')
-      const userInfo = getStorageSync('userInfo')
-      if(userInfo) {
-        // userInfo in storage
-        if(token) {
-          userInfo.userId = token
-          try {
-            yield call(postAlipayUser, userInfo)
+      }else if(process.env.TARO_ENV === 'alipay') {
+        try {
+          const { authCode } = yield call(() => my.getAuthCode())
+          const { data } = yield call(fetchAliPayUserId, authCode)
+          if(data.status === 0) {
+            setStorage('token', data.data)
             Taro.redirectTo({ url: '/pages/login/login' })
-          }catch(error) {
-            showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
-          }
-          Taro.redirectTo({ url: '/pages/login/login' })
-        }else {
-          try {
-            const { authCode } = yield call(() => my.getAuthCode())
-            const { data } = yield call(fetchAliPayUserId, authCode)
-            if(data.status === 0) {
-              setStorage('token', data.data)
-              userInfo.userId = token
-              try {
-                yield call(postAlipayUser, userInfo)
-                Taro.redirectTo({ url: '/pages/login/login' })
-              }catch(error) {
-                showDialog('发生错误', '系统繁忙，请稍后再试', false, '关闭')
-              }
-            }else {
-              showDialog('', '请求授权失败', false, '关闭')
-            }
-          }catch(error) {
+          }else {
             showDialog('', '请求授权失败', false, '关闭')
           }
+        }catch(error) {
+          showDialog('', '请求授权失败', false, '关闭')
         }
-      }else {
-        // userInfo not in storage
-        Taro.redirectTo({ url: '/pages/aliPayLoadPage/aliPayLoadPage' })
+      }else if(process.env.TARO_ENV === 'h5') {
+          console.log('h5')
+          Taro.redirectTo({ url: '/pages/login/login' })
       }
-    }else if(process.env.TARO_ENV === 'h5') {
-        console.log('h5')
-        Taro.redirectTo({ url: '/pages/login/login' })
     }
   }
 }

@@ -6,5 +6,6 @@
   "ecards": "/api/v1/wechat/ecards",
   "getUnionId": "/api/wechat/mini/getUnionidForMini",
   "profiles": "/api/padi_china/profiles",
-  "updateAlipayUser": "/api/alipay/updateAlipayUser"
+  "updateAlipayUser": "/api/alipay/updateAlipayUser",
+  "hasLogin": "/api/padi_china/has_login"
 }

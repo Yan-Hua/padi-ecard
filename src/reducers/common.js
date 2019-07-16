@@ -11,8 +11,18 @@ function locationChange(state = '/pages/home/home', { type, path }) {
     }
 }
 
+function padiQrCode(state = false, { type, path }) {
+    switch(type) {
+        case ActionTypes.SHOW_PADI_QR:
+            return true
+        default:
+            return state
+    }
+}
+
 const commonReducer = combineReducers({
-    locationChange
+    locationChange,
+    padiQrCode
 })
 
 export default commonReducer
